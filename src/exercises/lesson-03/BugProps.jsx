@@ -12,11 +12,19 @@
   Use the commented "Explanation" section at the bottom of this lesson's components.
 */
 
+import { useState } from 'react';
+
+const initMessage = 'Hello, friend!';
+
 export default function BugProps({ name = 'friend' }) {
-  let message = 'Hello, ' + name;
+  const [message, setMessage] = useState(initMessage);
 
   function handleChange() {
-    message = 'Hi, ' + name + '!';
+    if (message === 'Hello, ' + name + '!') {
+      setMessage('Hi, ' + name + '!');
+    } else {
+      setMessage('Hello, ' + name + '!');
+    }
   }
 
   return (
@@ -28,4 +36,4 @@ export default function BugProps({ name = 'friend' }) {
 }
 
 // Explanation:
-// (Write your explanation here)
+// I used state to track changes to the message.
