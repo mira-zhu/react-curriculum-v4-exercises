@@ -10,6 +10,12 @@ export default function BugStrictMode() {
     setInterval(() => {
       setCount((c) => c + 1);
     }, 1000);
+
+    return () => {
+      setInterval(() => {
+        setCount((c) => c - 1);
+      }, 1000);
+    };
   }, []);
 
   return (
@@ -21,3 +27,4 @@ export default function BugStrictMode() {
 }
 
 // Write your explanation of how StrictMode helps us catch this bug
+// Added a cleanup function to useEffect so that setCount does not increment twice when StrictMode calls useEffect twice
