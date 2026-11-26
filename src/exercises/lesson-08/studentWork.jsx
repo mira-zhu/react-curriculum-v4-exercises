@@ -1,7 +1,7 @@
 //Lesson-08 Advanced Hooks: useCallback and useMemo, Optimizing a React App
 //Exercise: Book Library Dashboard Performance Optimization
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { bookData, getAllGenres, filterBooksByGenre } from './bookData.js';
 import {
   useRenderCounter,
@@ -14,7 +14,7 @@ import styles from './StudentWork.module.css';
 // Main Dashboard Component - Contains performance issues to be optimized
 export default function StudentWork() {
   const { count } = useRenderCounter('BookDashboard');
-
+  const [filteredBooks, setFilteredBooks] = useState(bookData);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [sortBy, setSortBy] = useState('title');
@@ -24,19 +24,19 @@ export default function StudentWork() {
 
   // TODO #1: Optimize this search handler with useCallback
   // This function is recreated on every render, causing BookCard re-renders
-  const handleSearch = (e) => {
+  const handleSearch = useCallback((e) => {
     setSearchTerm(e.target.value);
-  };
+  }, []);
 
   // TODO #2: Optimize this favorite toggle handler with useCallback
   // This function is recreated on every render, causing BookCard re-renders
-  const handleToggleFavorite = (bookId) => {
+  const handleToggleFavorite = useCallback((bookId) => {
     setFavorites((prev) =>
       prev.includes(bookId)
         ? prev.filter((id) => id !== bookId)
         : [...prev, bookId]
     );
-  };
+  }, []);
 
   const handleGenreToggle = (genre) => {
     setSelectedGenres((prev) =>
@@ -45,13 +45,19 @@ export default function StudentWork() {
   };
 
   // Filter books by search term and selected genres
-  let filteredBooks = bookData.filter(
+  let newFilteredBooks = bookData.filter(
     (book) =>
       book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  newFilteredBooks = filterBooksByGenre(newFilteredBooks, selectedGenres);
 
-  filteredBooks = filterBooksByGenre(filteredBooks, selectedGenres);
+  if (
+    JSON.stringify(filteredBooks.sort()) !==
+    JSON.stringify(newFilteredBooks.sort())
+  ) {
+    setFilteredBooks(newFilteredBooks);
+  }
 
   return (
     <div className={styles.dashboard}>
@@ -214,7 +220,6 @@ export default function StudentWork() {
       {/* Book List */}
       <BookList
         books={filteredBooks}
-        searchTerm={searchTerm}
         sortBy={sortBy}
         favorites={favorites}
         onToggleFavorite={handleToggleFavorite}
